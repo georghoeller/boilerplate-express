@@ -1,5 +1,5 @@
 require('dotenv').config();
-
+const bodyParser = require('body-parser');
 
 let express = require('express');
 let app = express();
@@ -12,6 +12,11 @@ app.use( function middleware(req,res,next){
     console.log(middlewareLogger);
     next();
 });
+
+// app.use is for ressources to be used > here css styles are imported
+app.use('/public', express.static(__dirname+'/public') );
+
+app.use(bodyParser.urlencoded({extended: false}));
 
 
 // serve the index.html file as a main page 
@@ -34,7 +39,27 @@ app.get('/json', function(req,res){
     
   });
 
-// app.use is for ressources to be used > here css styles are imported
-app.use('/public', express.static(__dirname+'/public') );
+app.get('/now', function(req,res,next){
+    req.time = new Date().toString();
+    next();
+},function(req,res){
+    res.send({"time":req.time})
+});
+
+app.get('/:word/echo', function(req,res,next){
+    res.send({"echo":req.params.word})
+});
+
+app.get('/name', function(req,res,next){
+    const firstname = req.query.first;
+    const lastname = req.query.last;
+    res.send({"name": `${firstname} ${lastname}`})
+});
+
+app.post('/name', function(req,res){
+    const string = req.body.first + " " + req.body.last; 
+    res.json({name:string});
+});
+
 
  module.exports = app;
